@@ -35,6 +35,55 @@ function centerColor(n) {
   return color
 }
 
+function distance(p1, p2) {
+  return Math.sqrt(Math.pow(p1.x - p2.x) + Math.pow(p1.y - p2.y))
+}
+
+function assign(point, centers) {
+  let closestCenter = centers[0]
+  let minDist = distance(point, closestCenter)
+  for (let center of centers) {
+    const currDist = distance(point, center)
+    if (currDist < minDist) {
+      minDist = currDist
+      closestCenter = center
+    }
+  }
+
+  return {
+    id: closestCenter.id,
+    color: closestCenter.color
+  }
+}
+
+function areCentersDifferent(oldCenters, newCenters) {
+  for(let i = 0; i < oldCenters.length; i++) {
+    if(oldCenters[i].x !== newCenters[i].x || oldCenters[i].y !== newCenters[i].y) {
+      return true
+    }
+  }
+
+  return false
+}
+
+function newCenterCoords(data, center) {
+  let xSum = 0
+  let ySum = 0
+  let numInCluster = 0
+  for (let point of center) {
+    if (point.id === center.id) {
+      numInCluster++
+      xSum += point.x
+      ySum += point.y
+    }
+  }
+
+  return {
+    x: xSum / numInCluster,
+    y: ySum / numInCluster
+  }
+}
+
 function App() {
 
   const numPoints = 100
@@ -92,6 +141,32 @@ function App() {
     setMethod(() => e.target.value)
   }
 
+  const initCenters = () => {
+    if(method === "Random") {
+      randomCenters()
+    } else if(method === "Farthest First") {
+      farthestCenters()
+    } else if(method === "KMeans++") {
+      plusplusCenters()
+    } else {
+      return false;
+    }
+
+    return true;
+  }
+
+  const step = () => {
+    if (centers.length !== k) {
+      const centersCreated = initCenters()
+      
+      // The manual case where the user has not created enough centers
+      if (!centersCreated) {
+        return
+      }
+    } 
+
+  }
+
 
   return (
     <div className="app-container">
@@ -110,7 +185,7 @@ function App() {
         <option value="Manual">Manual</option>
       </select>
 
-      <button>Step Through KMeans</button>
+      <button onClick={step}>Step Through KMeans</button>
 
       <button>Run to Convergence</button>
 
