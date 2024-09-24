@@ -2,13 +2,21 @@ import { useState } from 'react'
 import Plot from 'react-plotly.js'
 import "./styles.css"
 
+function randomDataPoint() {
+  return {
+    ...randomPoint(),
+    color: "magenta",
+    id: -1
+  }
+}
+
 function randomPoint() {
   const x = (Math.random() * 20) - 10
   const y = (Math.random() * 20) - 10
+
   return {
     x,
-    y,
-    color: "blue"
+    y
   }
 }
 
@@ -16,17 +24,29 @@ function validNumber(num, totalPoints) {
   return (num > 0 && num <= totalPoints)|| num == ""
 }
 
+function centerColor(n) {
+  const rgb = [0,0,0]
+  rgb[n % 3] = ((n + 1) * 111) % 255
+  rgb[(n + 1) % 3] = ((n + 1) * 13) % 255
+  rgb[(n + 2) % 3] = ((n + 1) * 5) % 255
+
+  const color = `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`
+
+  return color
+}
+
 function App() {
 
   const numPoints = 100
-  const [data, setData] = useState([...Array(numPoints)].map(() => randomPoint()))
+  const [data, setData] = useState([...Array(numPoints)].map(() => randomDataPoint()))
   const [centers, setCenters] = useState([])
+
   const [method, setMethod] = useState("Random")
   const [warning, setWarning] = useState(false)
   const [k, setK] = useState(2)
 
   const newPoints = () => {
-    const points = [...Array(numPoints)].map(() => randomPoint())
+    const points = [...Array(numPoints)].map(() => randomDataPoint())
 
     setData(() => points)
   }
@@ -41,6 +61,21 @@ function App() {
     setWarning(() => false)
 
     return num
+  }
+
+  const addCenter = point => {
+    setCenters(prevCenters => [...prevCenters, {
+      ...point,
+      color: centerColor(prevCenters.length),
+      id: prevCenters.length
+    }])
+  }
+
+  const randomCenters = () => {
+    setCenters(() => [])
+    for(let i = 0; i < k; i++) {
+      addCenter(randomPoint())
+    }
   }
 
 
@@ -69,6 +104,8 @@ function App() {
 
       <button>Reset Algorithm</button>
 
+      <button onClick={randomCenters}>TEST: Random Centers</button>
+
       <Plot
         data={[
           {
@@ -77,6 +114,13 @@ function App() {
             type: 'scatter',
             mode: 'markers',
             marker: {color: data.map(point => point.color)},
+          },
+          {
+            x: centers.map(point => point.x),
+            y: centers.map(point => point.y),
+            type: 'scatter',
+            mode: 'markers',
+            marker: {color: centers.map(point => point.color), size: 10}
           },
         ]}
         layout={ {width: 6, height: 560, title: `K-means: ${method}`} }
