@@ -46,6 +46,7 @@ function App() {
   const [k, setK] = useState(2)
 
   const newPoints = () => {
+    setCenters(() => [])
     const points = [...Array(numPoints)].map(() => randomDataPoint())
 
     setData(() => points)
@@ -59,6 +60,7 @@ function App() {
 
   const valid = num => {
     setWarning(() => false)
+    setCenters(() => [])
 
     return num
   }
@@ -78,6 +80,18 @@ function App() {
     }
   }
 
+  const clickPoint = e => {
+    if (method === "Manual" && centers.length < k) {
+      const point = e.points[0]
+      addCenter({x: point.x, y: point.y})
+    }
+  }
+
+  const methodChanged = e => {
+    setCenters(() => [])
+    setMethod(() => e.target.value)
+  }
+
 
   return (
     <div className="app-container">
@@ -89,7 +103,7 @@ function App() {
       {warning && <div>Please enter a number between 1 and {numPoints}</div>}
 
       <label htmlFor="method">Center Initialization Method:</label>
-      <select name="method" id="method" value={method} onChange={e => setMethod(() => e.target.value)}>
+      <select name="method" id="method" value={method} onChange={methodChanged}>
         <option value="Random">Random</option>
         <option value="Farthest First">Farthest First</option>
         <option value="KMeans++">KMeans++</option>
@@ -102,7 +116,7 @@ function App() {
 
       <button onClick={newPoints}>Generate New Dataset</button>
 
-      <button>Reset Algorithm</button>
+      <button onClick={() => setCenters(() => [])}>Reset Algorithm</button>
 
       <button onClick={randomCenters}>TEST: Random Centers</button>
 
@@ -111,19 +125,22 @@ function App() {
           {
             x: data.map(point => point.x),
             y: data.map(point => point.y),
-            type: 'scatter',
-            mode: 'markers',
+            name: "Data",
+            type: "scatter",
+            mode: "markers",
             marker: {color: data.map(point => point.color)},
           },
           {
             x: centers.map(point => point.x),
             y: centers.map(point => point.y),
-            type: 'scatter',
-            mode: 'markers',
+            name: "Centers",
+            type: "scatter",
+            mode: "markers",
             marker: {color: centers.map(point => point.color), size: 10}
           },
         ]}
         layout={ {width: 6, height: 560, title: `K-means: ${method}`} }
+        onClick={clickPoint}
       />
     </div>
   )
