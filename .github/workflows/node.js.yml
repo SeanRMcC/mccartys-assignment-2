@@ -31,4 +31,5 @@ jobs:
     - name: install dependencies
       run: make install 
     - name: run application
-      run: make run
+      run: make run; sleep 5; exit
+
