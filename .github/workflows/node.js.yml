@@ -31,5 +31,7 @@ jobs:
     - name: install dependencies
       run: make install 
     - name: run application
-      run: make run; sleep 5; exit
+      run: make run & sleep 5
+    - name: stop server
+      run: kill $(jobs -p) || true
 
