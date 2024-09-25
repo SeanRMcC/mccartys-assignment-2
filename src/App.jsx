@@ -36,7 +36,9 @@ function centerColor(n) {
 }
 
 function distance(p1, p2) {
-  return Math.sqrt(Math.pow(p1.x - p2.x) + Math.pow(p1.y - p2.y))
+  console.log(typeof p1.x)
+  console.log(typeof p1.y)
+  return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2))
 }
 
 function assign(point, centers) {
@@ -70,7 +72,7 @@ function newCenterCoords(data, center) {
   let xSum = 0
   let ySum = 0
   let numInCluster = 0
-  for (let point of center) {
+  for (let point of data) {
     if (point.id === center.id) {
       numInCluster++
       xSum += point.x
@@ -84,11 +86,49 @@ function newCenterCoords(data, center) {
   }
 }
 
+function newCenters(data, centers) {
+  return centers.map(center => {
+    const newPoints = newCenterCoords(data, center)
+    return {
+      ...center,
+      x: newPoints.x,
+      y: newPoints.y
+    }
+  })
+}
+
+function assignPoints(data, centers) {
+  return data.map(point => {
+
+    const assignment = assign(point, centers)
+
+
+    return {
+      ...point,
+      id: assignment.id,
+      color: assignment.color
+    }
+
+  })
+}
+
+function averageDistance(centers, dataPoint) {
+  let distanceSum = 0
+
+  for (let center of centers) {
+    distanceSum += distance(dataPoint, center)
+  }
+
+  return distanceSum / centers.length
+
+}
+
 function App() {
 
   const numPoints = 100
   const [data, setData] = useState([...Array(numPoints)].map(() => randomDataPoint()))
   const [centers, setCenters] = useState([])
+  const [pointAssigned, setPointsAssigned] = useState(false)
 
   const [method, setMethod] = useState("Random")
   const [warning, setWarning] = useState(false)
@@ -123,10 +163,65 @@ function App() {
   }
 
   const randomCenters = () => {
-    setCenters(() => [])
-    for(let i = 0; i < k; i++) {
-      addCenter(randomPoint())
+
+
+    const newCenters = [...Array(k)].map((value, index) => {
+      const point = randomPoint()
+
+      return {
+        ...point,
+        color: centerColor(index),
+        id: index
+      }
+    })
+
+
+    return newCenters
+
+
+  }
+
+  const farthestCenters = data => {
+    const newCenters = []
+    const randomPoint = data[Math.floor(Math.random() * data.length)]
+
+    newCenters.push(
+      {
+        x: randomPoint.x,
+        y: randomPoint.y,
+        color: centerColor(newCenters.length),
+        id: newCenters.length
+      }
+    )
+
+    for(let x = 1; x < k; x++) {
+      let farthestPoint = data[0]
+      let farthestDistance = averageDistance(newCenters, data[0])
+      for(let dataPoint of data) {
+        const currDistance = averageDistance(newCenters, dataPoint)
+        if (currDistance > farthestDistance) {
+          farthestDistance = currDistance
+          farthestPoint = dataPoint
+        }
+      }
+
+      newCenters.push(
+        {
+          x: farthestPoint.x,
+          y: farthestPoint.y,
+          color: centerColor(newCenters.length),
+          id: newCenters.length
+        }
+      )
+
     }
+
+    return newCenters
+
+  }
+
+  const plusplusCenters = data => {
+
   }
 
   const clickPoint = e => {
@@ -143,27 +238,30 @@ function App() {
 
   const initCenters = () => {
     if(method === "Random") {
-      randomCenters()
+      return randomCenters()
     } else if(method === "Farthest First") {
-      farthestCenters()
-    } else if(method === "KMeans++") {
-      plusplusCenters()
+      return farthestCenters(data)
     } else {
-      return false;
-    }
+      return plusplusCenters(data)
+    } 
 
-    return true;
   }
 
   const step = () => {
     if (centers.length !== k) {
-      const centersCreated = initCenters()
-      
-      // The manual case where the user has not created enough centers
-      if (!centersCreated) {
-        return
+      if (method === "Manual") {
+        // HANDLE NOT ENOUGH POINTS SELECTED
       }
-    } 
+      // CREATE CENTERS AND ASSIGN DATA
+      const initialCenters = initCenters()
+      const assignedData = assignPoints(data, initialCenters)
+      setCenters(() => initialCenters)
+      setData(() => assignedData)
+    } else {
+      // RECALCULATE CENTERS AND CHECK IF CENTERS CHANGED
+
+      // ASSIGN DATA IF CENTERS CHANGED
+    }
 
   }
 
@@ -173,7 +271,7 @@ function App() {
       <h1>Visualization of KMeans</h1>
 
       <label htmlFor="clusters">Number of Clusters (k):</label>
-      <input type="number" name="clusters" id="clusters" value={k} onChange={e => setK(prevK => validNumber(e.target.value, numPoints)? valid(e.target.value): invalid(prevK))}/>
+      <input type="number" name="clusters" id="clusters" value={k} onChange={e => setK(prevK => validNumber(e.target.value, numPoints)? Number(valid(e.target.value)): Number(invalid(prevK)))}/>
 
       {warning && <div>Please enter a number between 1 and {numPoints}</div>}
 
@@ -193,7 +291,7 @@ function App() {
 
       <button onClick={() => setCenters(() => [])}>Reset Algorithm</button>
 
-      <button onClick={randomCenters}>TEST: Random Centers</button>
+      <button onClick={() => setCenters(() => randomCenters())}>TEST: Random Centers</button>
 
       <Plot
         data={[
