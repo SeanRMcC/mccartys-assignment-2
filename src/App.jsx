@@ -36,8 +36,6 @@ function centerColor(n) {
 }
 
 function distance(p1, p2) {
-  console.log(typeof p1.x)
-  console.log(typeof p1.y)
   return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2))
 }
 
@@ -251,16 +249,33 @@ function App() {
     if (centers.length !== k) {
       if (method === "Manual") {
         // HANDLE NOT ENOUGH POINTS SELECTED
+        alert(`Need to assign ${k} points`)
+        return 
       }
       // CREATE CENTERS AND ASSIGN DATA
       const initialCenters = initCenters()
       const assignedData = assignPoints(data, initialCenters)
       setCenters(() => initialCenters)
       setData(() => assignedData)
+      setPointsAssigned(() => true)
+    } else if (!pointAssigned) {
+      const assignedData = assignPoints(data, centers)
+      setData(() => assignedData)
+      setPointsAssigned(() => true)
     } else {
       // RECALCULATE CENTERS AND CHECK IF CENTERS CHANGED
+      const recalculatedCenters = newCenters(data, centers)
+
+      if (!areCentersDifferent(centers, recalculatedCenters)) {
+        alert("K Means is Done!")
+        return
+      }
 
       // ASSIGN DATA IF CENTERS CHANGED
+      const newAssignments = assignPoints(data, recalculatedCenters)
+
+      setData(() => newAssignments) 
+      setCenters(() => recalculatedCenters)
     }
 
   }
