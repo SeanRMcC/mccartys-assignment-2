@@ -121,6 +121,30 @@ function averageDistance(centers, dataPoint) {
 
 }
 
+function pickWeightedPoint(weights) {
+  const sum = weights.reduce((acc, curr) => acc + curr, 0)
+  const randomNum = Math.floor(Math.random() * sum)
+
+  const weightsCopy = weights.map(num => num)
+
+  console.log(weightsCopy)
+
+  for (let i = 1; i < weightsCopy.length; i++) {
+    weightsCopy[i] += weightsCopy[i - 1];
+  }
+
+  console.log(weightsCopy)
+
+  let randomIndex = 0
+
+
+  while (weightsCopy[randomIndex] < randomNum) {
+    randomIndex++
+  }
+
+  return randomIndex;
+}
+
 function App() {
 
   const numPoints = 100
@@ -232,6 +256,30 @@ function App() {
     )
 
     // TODO: Have it add centers with a probability proportional to the distance squared
+
+    for (let x = 1; x < k; x++) {
+      const distancesSquared = data.map(point => {
+        const dis = averageDistance(newCenters, point)
+        return Math.pow(Math.floor(dis), 2)
+      })
+
+      const dataPointIndex = pickWeightedPoint(distancesSquared)
+
+      console.log(dataPointIndex)
+
+      newCenters.push(
+        {
+          x: data[dataPointIndex].x,
+          y: data[dataPointIndex].y,
+          color: centerColor(newCenters.length),
+          id: newCenters.length
+        }
+      )
+
+
+    }
+
+    return newCenters
 
   }
 
