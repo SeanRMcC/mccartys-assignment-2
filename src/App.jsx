@@ -255,7 +255,6 @@ function App() {
       }
     )
 
-    // TODO: Have it add centers with a probability proportional to the distance squared
 
     for (let x = 1; x < k; x++) {
       const distancesSquared = data.map(point => {
@@ -371,6 +370,17 @@ function App() {
     setCenters(() => currCenters)
   }
 
+  const resetAlg = () => {
+    setCenters(() => [])
+    setData(prevData => prevData.map(dataPoint => {
+      return {
+        ...dataPoint,
+        color: "magenta",
+        id: -1
+      }
+    }))
+  }
+
 
   return (
     <div className="app-container">
@@ -395,7 +405,7 @@ function App() {
 
       <button onClick={newPoints}>Generate New Dataset</button>
 
-      <button onClick={() => setCenters(() => [])}>Reset Algorithm</button>
+      <button onClick={resetAlg}>Reset Algorithm</button>
 
       <Plot
         data={[
