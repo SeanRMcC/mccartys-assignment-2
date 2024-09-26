@@ -21,18 +21,14 @@ function randomPoint() {
 }
 
 function validNumber(num, totalPoints) {
-  return (num > 0 && num <= totalPoints)|| num == ""
+  return (num > 0 && num <= 10) || num == ""
 }
 
 function centerColor(n) {
-  const rgb = [0,0,0]
-  rgb[n % 3] = ((n + 1) * 111) % 255
-  rgb[(n + 1) % 3] = ((n + 1) * 13) % 255
-  rgb[(n + 2) % 3] = ((n + 1) * 5) % 255
 
-  const color = `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`
+  const colors = ["red", "blue", "green", "purple", "orange", "pink", "black", "brown", "silver", "gold"]
 
-  return color
+  return colors[n]
 }
 
 function distance(p1, p2) {
@@ -127,13 +123,10 @@ function pickWeightedPoint(weights) {
 
   const weightsCopy = weights.map(num => num)
 
-  console.log(weightsCopy)
-
   for (let i = 1; i < weightsCopy.length; i++) {
     weightsCopy[i] += weightsCopy[i - 1];
   }
 
-  console.log(weightsCopy)
 
   let randomIndex = 0
 
@@ -264,7 +257,6 @@ function App() {
 
       const dataPointIndex = pickWeightedPoint(distancesSquared)
 
-      console.log(dataPointIndex)
 
       newCenters.push(
         {
@@ -389,7 +381,7 @@ function App() {
       <label htmlFor="clusters">Number of Clusters (k):</label>
       <input type="number" name="clusters" id="clusters" value={k} onChange={e => setK(prevK => validNumber(e.target.value, numPoints)? Number(valid(e.target.value)): Number(invalid(prevK)))}/>
 
-      {warning && <div>Please enter a number between 1 and {numPoints}</div>}
+      {warning && <div>Please enter a number between 1 and 10</div>}
 
       <label htmlFor="method">Center Initialization Method:</label>
       <select name="method" id="method" value={method} onChange={methodChanged}>
