@@ -219,6 +219,19 @@ function App() {
   }
 
   const plusplusCenters = data => {
+    const newCenters = []
+    const randomPoint = data[Math.floor(Math.random() * data.length)]
+
+    newCenters.push(
+      {
+        x: randomPoint.x,
+        y: randomPoint.y,
+        color: centerColor(newCenters.length),
+        id: newCenters.length
+      }
+    )
+
+    // TODO: Have it add centers with a probability proportional to the distance squared
 
   }
 
@@ -280,6 +293,36 @@ function App() {
 
   }
 
+  const runToEnd = () => {
+
+    let currCenters = centers
+    let currData = data
+
+    if (currCenters.length !== k) {
+      if (method === "Manual") {
+        alert("assign k points")
+      }
+
+      currCenters = initCenters()
+      currData = assignPoints(currData, currCenters)
+
+
+    } else if (!pointAssigned) {
+      currData = assignPoints(currData, currCenters)
+    }
+
+    let recalculatedCenters = newCenters(currData, currCenters)
+
+    while (areCentersDifferent(currCenters, recalculatedCenters)) {
+      currCenters = recalculatedCenters
+      currData = assignPoints(currData, currCenters)
+      recalculatedCenters = newCenters(currData, currCenters)
+    }
+
+    setData(() => currData)
+    setCenters(() => currCenters)
+  }
+
 
   return (
     <div className="app-container">
@@ -300,13 +343,11 @@ function App() {
 
       <button onClick={step}>Step Through KMeans</button>
 
-      <button>Run to Convergence</button>
+      <button onClick={runToEnd}>Run to Convergence</button>
 
       <button onClick={newPoints}>Generate New Dataset</button>
 
       <button onClick={() => setCenters(() => [])}>Reset Algorithm</button>
-
-      <button onClick={() => setCenters(() => randomCenters())}>TEST: Random Centers</button>
 
       <Plot
         data={[
