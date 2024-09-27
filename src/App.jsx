@@ -156,7 +156,7 @@ function App() {
 
   const [method, setMethod] = useState("Random")
   const [warning, setWarning] = useState(false)
-  const [k, setK] = useState(2)
+  const [k, setK] = useState(3)
 
   const newPoints = () => {
     setCenters(() => [])
@@ -390,26 +390,39 @@ function App() {
     <div className="app-container">
       <h1>Visualization of KMeans</h1>
 
-      <label htmlFor="clusters">Number of Clusters (k):</label>
-      <input type="number" name="clusters" id="clusters" value={k} onChange={e => setK(prevK => changeK(e.target.value)? Number(valid(e.target.value)): Number(invalid(prevK)))}/>
+      <div className="section">
 
-      {warning && <div>Please enter a number between 1 and 10</div>}
+        <label className="txt" htmlFor="clusters">Number of Clusters (k):</label>
+        <input className="num" type="number" name="clusters" id="clusters" value={k} onChange={e => setK(prevK => changeK(e.target.value)? Number(valid(e.target.value)): Number(invalid(prevK)))}/>
 
-      <label htmlFor="method">Center Initialization Method:</label>
-      <select name="method" id="method" value={method} onChange={methodChanged}>
-        <option value="Random">Random</option>
-        <option value="Farthest First">Farthest First</option>
-        <option value="KMeans++">KMeans++</option>
-        <option value="Manual">Manual</option>
-      </select>
+        {warning && <div>Please enter a number between 1 and 10</div>}
 
-      <button className="btn" onClick={step}>Step Through KMeans</button>
+      </div>
 
-      <button className="btn" onClick={runToEnd}>Run to Convergence</button>
 
-      <button className="btn" onClick={newPoints}>Generate New Dataset</button>
+      <div className="section">
 
-      <button className="btn" onClick={resetAlg}>Reset Algorithm</button>
+        <label className="txt" htmlFor="method">Center Initialization Method:</label>
+        <select className="method" name="method" id="method" value={method} onChange={methodChanged}>
+          <option value="Random">Random</option>
+          <option value="Farthest First">Farthest First</option>
+          <option value="KMeans++">KMeans++</option>
+          <option value="Manual">Manual</option>
+        </select>
+
+      </div>
+
+      <div className="section">
+
+        <button className="btn" onClick={step}>Step Through KMeans</button>
+
+        <button className="btn" onClick={runToEnd}>Run to Convergence</button>
+
+        <button className="btn" onClick={newPoints}>Generate New Dataset</button>
+
+        <button className="btn" onClick={resetAlg}>Reset Algorithm</button>
+      
+      </div>
 
       <Plot
         data={[
