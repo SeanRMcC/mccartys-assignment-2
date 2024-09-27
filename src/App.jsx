@@ -20,7 +20,8 @@ function randomPoint() {
   }
 }
 
-function validNumber(num, totalPoints) {
+function validNumber(num) {
+
   return (num > 0 && num <= 10) || num == ""
 }
 
@@ -138,12 +139,20 @@ function pickWeightedPoint(weights) {
   return randomIndex;
 }
 
+function pointsAssigned(data) {
+  for (let point of data) {
+    if (point.id === -1) {
+      return false
+    }
+  }
+  return true
+}
+
 function App() {
 
   const numPoints = 100
   const [data, setData] = useState([...Array(numPoints)].map(() => randomDataPoint()))
   const [centers, setCenters] = useState([])
-  const [pointAssigned, setPointsAssigned] = useState(false)
 
   const [method, setMethod] = useState("Random")
   const [warning, setWarning] = useState(false)
@@ -282,7 +291,7 @@ function App() {
   }
 
   const methodChanged = e => {
-    setCenters(() => [])
+    resetAlg()
     setMethod(() => e.target.value)
   }
 
@@ -309,11 +318,9 @@ function App() {
       const assignedData = assignPoints(data, initialCenters)
       setCenters(() => initialCenters)
       setData(() => assignedData)
-      setPointsAssigned(() => true)
-    } else if (!pointAssigned) {
+    } else if (!pointsAssigned(data)) {
       const assignedData = assignPoints(data, centers)
       setData(() => assignedData)
-      setPointsAssigned(() => true)
     } else {
       // RECALCULATE CENTERS AND CHECK IF CENTERS CHANGED
       const recalculatedCenters = newCenters(data, centers)
@@ -346,7 +353,7 @@ function App() {
       currData = assignPoints(currData, currCenters)
 
 
-    } else if (!pointAssigned) {
+    } else if (!pointsAssigned(currData)) {
       currData = assignPoints(currData, currCenters)
     }
 
@@ -373,13 +380,18 @@ function App() {
     }))
   }
 
+  const changeK = n => {
+    resetAlg()
+    return validNumber(n)
+  }
+
 
   return (
     <div className="app-container">
       <h1>Visualization of KMeans</h1>
 
       <label htmlFor="clusters">Number of Clusters (k):</label>
-      <input type="number" name="clusters" id="clusters" value={k} onChange={e => setK(prevK => validNumber(e.target.value, numPoints)? Number(valid(e.target.value)): Number(invalid(prevK)))}/>
+      <input type="number" name="clusters" id="clusters" value={k} onChange={e => setK(prevK => changeK(e.target.value)? Number(valid(e.target.value)): Number(invalid(prevK)))}/>
 
       {warning && <div>Please enter a number between 1 and 10</div>}
 
@@ -391,13 +403,13 @@ function App() {
         <option value="Manual">Manual</option>
       </select>
 
-      <button onClick={step}>Step Through KMeans</button>
+      <button className="btn" onClick={step}>Step Through KMeans</button>
 
-      <button onClick={runToEnd}>Run to Convergence</button>
+      <button className="btn" onClick={runToEnd}>Run to Convergence</button>
 
-      <button onClick={newPoints}>Generate New Dataset</button>
+      <button className="btn" onClick={newPoints}>Generate New Dataset</button>
 
-      <button onClick={resetAlg}>Reset Algorithm</button>
+      <button className="btn" onClick={resetAlg}>Reset Algorithm</button>
 
       <Plot
         data={[
